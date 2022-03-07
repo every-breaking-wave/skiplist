@@ -1,11 +1,11 @@
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
-#include "skiplist.h"
+#include "SkipList.h"
 #include <time.h>
 using namespace std;
 
-double SkipList::my_rand()   // 这是一个生成p值为0.5的函数
+double SkipList::my_rand()
 {
     s = (16807 * s) % 2147483647ULL;
     return (s + 0.0) / 2147483647ULL;
@@ -24,14 +24,23 @@ int SkipList::randomLevel()
 
 void SkipList::Insert(int key, int value){
 
-   //  std::vector<SKNode *> update;
+    int curLevel = 8;
+    for(int i = 7; i >=0; i--){
+        if(head->forwards[i] == NIL){
+            curLevel--;
+        }
+    }
+     std::vector<SKNode *> update;
+     for(int i = 0; i < MAX_LEVEL; i++){
+         update.push_back(nullptr);
+     }
      int i = MAX_LEVEL - 1;
     SKNode *node = head;
     if(head->forwards[0] == NIL){  // 还没有节点
         int level = randomLevel();
-        this->level = level;
+        curLevel = level;
         SKNode * insertNode = new SKNode(key, value, NORMAL);
-        for(int i = 0; i < this->level; i++){  // 改变原有指针结构
+        for(int i = 0; i < curLevel; i++){  // 改变原有指针结构
             insertNode->forwards[i] = NIL;
             head->forwards[i] = insertNode;
         }
@@ -51,11 +60,11 @@ void SkipList::Insert(int key, int value){
     }
     else {   // 不等，则在后面插入新节点
         int level = randomLevel();
-        if(level > this->level ){ // 需要更新level
-            for(int l = this->level; l <= level - 1; l ++){
+        if(level > curLevel ){ // 需要更新level
+            for(int l = curLevel; l <= level - 1; l ++){
                 update[l] = head;
             }
-            this->level = level;
+            curLevel = level;
         }
 
         SKNode * insertNode = new SKNode(key, value, NORMAL);
@@ -64,11 +73,18 @@ void SkipList::Insert(int key, int value){
             update[i]->forwards[i] = insertNode;
         }
     }
+
 }
 
 void SkipList::Search(int key)
 {
     // TODO
+    int curLevel = 8;
+    for(int i = 7; i >=0; i--){
+        if(head->forwards[i] == NIL){
+            curLevel--;
+        }
+    }
     int i = MAX_LEVEL - 1;
     SKNode *node = head;
     for( i = MAX_LEVEL - 1; i >= 0; i--){
@@ -97,11 +113,22 @@ void SkipList::Search(int key)
     else {  // 没找到
         cout<<"Not Found"<<endl;
     }
+
 }
 
 void SkipList::Delete(int key)
 {
   //   vector<SKNode *> update;
+   int curLevel = 8;
+    for(int i = 7; i >=0; i--){
+        if(head->forwards[i] == NIL){
+            curLevel--;
+        }
+    }
+    std::vector<SKNode *> update;
+     for(int i = 0; i < MAX_LEVEL; i++){
+         update.push_back(nullptr);
+     }
      int i = MAX_LEVEL - 1;
     SKNode *node = head;
     for( i = MAX_LEVEL - 1; i >= 0; i--){
@@ -113,7 +140,7 @@ void SkipList::Delete(int key)
     }
     node = node->forwards[0];
     if(node->key == key){
-        for(int i  = 0; i < this->level; i++){
+        for(int i  = 0; i < curLevel; i++){
             if(update[i]->forwards[i] != node){  // 该节点的高度不够
                 break;
             }
@@ -121,13 +148,13 @@ void SkipList::Delete(int key)
         }  
         //delete node;
     }
-    while (this->level > 1 && head->forwards[this->level]->type == SKNodeType::NIL)  {  // 调整lsit的高度
-        this->level--;
+    while (curLevel > 1 && head->forwards[curLevel - 1]->type == SKNodeType::NIL)  {  // 调整lsit的高度
+        curLevel--;
     }
     
 }
 
-void SkipList::Display()  // 打印当前的skiplist
+void SkipList::Display()
 {   
     for (int i = MAX_LEVEL - 1; i >= 0; --i)
     {
