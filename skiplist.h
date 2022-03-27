@@ -4,8 +4,6 @@
 #include <climits>
 #include <time.h>
 
-#include "Container.h"
-
 #define MAX_LEVEL 8
 
 enum SKNodeType
@@ -31,7 +29,7 @@ struct SKNode
     }
 };
 
-class SkipList : public Container
+class SkipList 
 {
 private:
     SKNode *head;
